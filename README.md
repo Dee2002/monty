@@ -88,4 +88,3 @@ Usage: `monty file`
 - If memory allocation fails, print the error message `Error: malloc failed`, followed by a new line, and exit with status `EXIT_FAILURE`. You must use `malloc` and `free` and are not allowed to use other memory allocation functions like `realloc` or `calloc`.
 
 ---
-### General
