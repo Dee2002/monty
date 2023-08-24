@@ -1,70 +1,80 @@
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include "monty.h"
 
-#define BUFFER_SIZE 1024
+stack_t *head = NULL;
 
 /**
-* main - entry point.
-* @argc: argument count
-* @argv: argument vector
-* Return: 0 on success, non-zero on failure.
+* main - entry point
+* @argc: arguments count
+* @argv: list of arguments
+* Return: always 0
 */
 int main(int argc, char *argv[])
 {
-FILE *file;
-stack_t *stack = NULL;
-char line[BUFFER_SIZE];
-int line_number = 1;
-
 if (argc != 2)
 {
 fprintf(stderr, "USAGE: monty file\n");
-return (EXIT_FAILURE);
+exit(EXIT_FAILURE);
+}
+open_file(argv[1]);
+free_nodes();
+return (0);
 }
 
-file = fopen(argv[1], "r");
-if (!file)
+/**
+* create_node - creates a node
+* @n: Number to go inside the node
+* Return: Upon sucess a pointer to the node.Otherwise NULL
+*/
+stack_t *create_node(int n)
 {
-fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
-return (EXIT_FAILURE);
+stack_t *node;
+
+node = malloc(sizeof(stack_t));
+if (node == NULL)
+err(4);
+node->next = NULL;
+node->prev = NULL;
+node->n = n;
+return (node);
 }
 
-while (fgets(line, sizeof(line), file) != NULL)
+/**
+* free_nodes - Frees nodes in the stack
+*/
+void free_nodes(void)
 {
-char *opcode = strtok(line, " \t\n");
-if (opcode)
+stack_t *tmp;
+if (head == NULL)
+return;
+
+while (head != NULL)
 {
-if (strcmp(opcode, "push") == 0)
-{
-char *arg = strtok(NULL, " \t\n");
-if (arg && is_number(arg))
-push(&stack, atoi(arg));
-else
-{
-fprintf(stderr, "L%d: usage: push integer\n", line_number);
-goto cleanup;
+tmp = head;
+head = head->next;
+free(tmp);
 }
-}
-else
-{
-instruction_t *instruction = get_instruction(opcode);
-if (instruction)
-instruction->f(&stack, line_number);
-else
-{
-fprintf(stderr, "L%d: unknown instruction %s\n", line_number, opcode);
-goto cleanup;
-}
-}
-}
-line_number++;
 }
 
-cleanup:
-fclose(file);
-free_stack(&stack);
-return (EXIT_SUCCESS);
+/**
+* add_to_queue - Adds a node to the queue
+* @new_node: Pointer to the new node
+* @ln: line number of the opcode
+*/
+void add_to_queue(stack_t **new_node, __attribute__((unused))unsigned int ln)
+{
+stack_t *tmp;
+
+if (new_node == NULL || *new_node == NULL)
+exit(EXIT_FAILURE);
+if (head == NULL)
+{
+head = *new_node;
+return;
+}
+tmp = head;
+while (tmp->next != NULL)
+tmp = tmp->next;
+
+tmp->next = *new_node;
+(*new_node)->prev = tmp;
 }
